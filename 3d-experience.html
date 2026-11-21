@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>3D Experience | BMWorld</title><meta name="description" content="BMW models with 3D assets.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Outfit:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="style.css" rel="stylesheet">
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+</head>
+<body data-page="3d" class="">
+<div id="hdr"></div>
+<main class="page-top "><div class="container"><h1>3D experience</h1><p class="lead">Only models with a 3D file appear here.</p>
+<div class="viewer" id="viewer" hidden><div><b>No 3D models yet</b><span>Add a .glb to assets/models/ and set <code>model3d</code> on a model in models.js. It then appears here with a working Three.js viewer.</span></div></div>
+<div class="row g-3" id="threeList"></div><h3 class="mt-4" id="stageTitle"></h3><div class="stage" id="stage" hidden></div></div></main>
+<div id="ftr"></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="config.js"></script><script src="images.js"></script><script src="content.js"></script><script src="models.js"></script><script src="common.js"></script><script src="pages.js"></script><script src="extras.js"></script>
+</body>
+</html>
