@@ -1,9 +1,5 @@
-# BMWorld
-      ______
-  ___/|_||_\`.__
- (   _    _ _  \
- =`-(_)--(_)-'
- 
+# ⭕⭕\_______/⭕⭕ BMWorld 
+
 **More Than a Machine. A Legacy.**
 
 ## About
