@@ -1,5 +1,3 @@
-/* MODEL DATABASE. To add a car: copy one block, give it a unique `slug`, add its images in images.js (MODEL_IMAGES[slug]).
-   Spec values: use "TBD" for anything not verified (shown as "To be added"). `o` = extra spec rows. `model3d` = path to a .glb (optional). */
 const CATS=["1 Series","2 Series","3 Series","4 Series","5 Series","6 Series","7 Series","8 Series","X Series","Z Series","M Series","i Series","Classic"];
 const MODELS=[
 {slug:"1m-coupe",name:"BMW 1 Series M Coupe",cat:"1 Series",gen:"E82",chassis:"E82",years:"2011",intro:"A compact, widened 1 Series built as a spiritual successor to the E30 M3.",
