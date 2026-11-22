@@ -1,4 +1,3 @@
-/* Site content (timeline, gallery, M4 generations). "TBD" = not verified yet. Models are in models.js, image URLs in images.js. */
 const TIMELINE=[
 {y:"1916",t:"BMW is founded",x:"Bayerische Flugzeug-Werke, rooted in Rapp Motorenwerke, builds aircraft engines in Munich."},
 {y:"1917",t:"Bayerische Motoren Werke",x:"The company takes the BMW name and the blue-and-white roundel."},
