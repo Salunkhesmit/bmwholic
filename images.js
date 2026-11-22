@@ -1,7 +1,3 @@
-/* CENTRAL IMAGE STORE.
- 1) REMOTE / LOCAL: named images (key -> URL or file.jpg). LOCAL wins over REMOTE.
- 2) MODEL_IMAGES: 4-5 slots per model slug (see below). Each slot is a key, a direct URL/path, "" (placeholder) or {src,alt}.
- 3) Gallery items in content.js can also use a key or a direct URL. */
 const LOCAL={};
 const REMOTE={
  "hero": "https://lh3.googleusercontent.com/aida/ALJJyrAOIP0hSwCNmHSm9qxZWNmffffUKB4WHpFvl0YMO5boJqU142KO815VGY797_ILLGkcBkfzUT_M5OnGxs_bYnDkSDZ81OXOw3WIUjnPCn9J9ZO71mSu_Nk-3hXyZTKTEBs9SAEG4QkuGCpAptWYmt3O0zwBpW4V3C3NhvDuozfGiS7iatEMv7nY7gN14qk5TlpokAdzCm9_dLnlAk3xn9E7gCdeFv1geHkjpS6uE_4K",
@@ -23,9 +19,9 @@ const REMOTE={
  "z8": "https://lh3.googleusercontent.com/aida-public/AB6AXuDUC2WE3K-aK709RhZRTHdfK3OgoGjHr83b00N2zORz348R_ZCRizF8EZci7SVxISuAiRmmMQbm3OpRTxq7KAWeciKGFMKhwVZNtLn0kkh66d03pf-t5oCR3YLL135JnhKNhQAUt7laI7Y2EuyNvKYbPtT4Va4SGNslZO7cPisYIey78F-p152BpDXIBIEVaxqIj8xO9O1foymVRXvm-Bpik6zCY6tO7xaMznngEjo",
  "g70": "https://lh3.googleusercontent.com/aida-public/AB6AXuCUcORfmCOq3z2NbcodqzxYPuVIqXTBIGCHuuNkrW9kBoN5T5nKJW-PHS11YbxYkbijdNCcnnUoD10zs-bcTX1HyTbQXPB7JjpwQwIPP1ZaAnjjJ3mu4yfIwWDBoR949rKl1Z6u8diFiQXrxT2u1dY80ewKFhVEIM_7YTFWUSd2iWGg5q8StklokT7a72Etkrle3EkNKUFK-TbRPCQkWHPmPsnFIXHBDtXy2pK3SFs"
 };
-/* Resolve a key, https URL or local path to a usable src ("" = show placeholder). */
+
 const imgSrc=k=>LOCAL[k]||REMOTE[k]||(/^(https?:)?\/\/|^[\w./-]+\.(jpe?g|png|webp|avif|gif|svg)$/i.test(k||"")?k:"");
-/* Per-model carousel images. Replace "" with your URL to fill a slot. Unused/empty slots show a labelled placeholder. */
+
 const MODEL_IMAGES={
  "m4-competition":["m4-night","m4-studio","m4-garage","hero","brakes"],
  "e30-m3":["e30-m3","","",""],
