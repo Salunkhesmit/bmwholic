@@ -1,21 +1,28 @@
-/* Homepage intro: black gate (click enables sound) -> credit fades in, 2s hold, drops away -> 0.5s black -> video.
-   Scrolling stays locked until the video's real `ended` event. Replays on every fresh load / refresh / hard refresh (no stored state). Only skipped when you come back from another page of this site (in-site link or back button). */
-(()=>{const $=s=>document.querySelector(s),root=document.documentElement,body=document.body,v=$('#introVideo'),gate=$('#gate'),credit=$('#credit'),cover=$('#cover');
+(()=>{const $=s=>document.querySelector(s),root=document.documentElement,body=document.body,v=$('#introVideo'),gate=$('#gate'),credit=$('#credit'),cover=$('#cover'),intro=$('#home');
  /* Skip only for in-site navigation (link/back from another BMWorld page). Reload, hard refresh, typed URL, bookmark or new tab always replay. */
  let seen=false;try{const nav=(performance.getEntriesByType('navigation')[0]||{}).type;let ref=false;try{ref=!!document.referrer&&new URL(document.referrer).origin===location.origin}catch(e){}
   seen=nav==='back_forward'||(nav==='navigate'&&ref)}catch(e){}
- let unlocked=false,started=false;
- const poster='intro-final-frame.jpg';
+ let unlocked=false,started=false,playing=false;
+ /* ---- responsive sources ---- */
+ const SRC={land:{video:'bmworld-intro.mp4',poster:'intro-final-frame.jpg'},port:{video:'bmworld-intro-mobile.mp4',poster:'intro-final-frame-mobile.jpg'}};
+ const mqPortrait=matchMedia('(orientation:portrait)');let mode=mqPortrait.matches?'port':'land',portOK=true;   /* portOK=false once the mobile file failed */
+ const cur=()=>portOK?SRC[mode]:SRC.land,poster=()=>cur().poster;
+ const still=img=>{img.onerror=()=>{if(img.getAttribute('src')!==SRC.land.poster){img.onerror=null;intro.classList.remove('vid-port');img.src=SRC.land.poster}}};
  function unlock(){if(unlocked)return;unlocked=true;
-  if(!v.ended){v.pause();v.poster=poster}                 /* failure path: show the final frame */
+  if(!v.ended){v.pause();v.poster=poster()}                 /* failure path: show the final frame */
   gate.remove();credit.remove();cover.remove();body.classList.add('ended');root.classList.remove('locked')}
- if(seen){const i=new Image();i.src=poster;i.alt='';i.className='intro-still';v.replaceWith(i);unlocked=false;v.ended=true;unlock();return}
+ if(seen){intro.classList.toggle('vid-port',mode==='port');const i=new Image();still(i);i.src=poster();i.alt='';i.className='intro-still';v.replaceWith(i);unlocked=false;v.ended=true;unlock();return}
  const block=e=>{if(!unlocked)e.preventDefault()},KEYS=['ArrowUp','ArrowDown','PageUp','PageDown','Home','End',' ','Spacebar'];
  addEventListener('wheel',block,{passive:false});addEventListener('touchmove',block,{passive:false});
  addEventListener('keydown',e=>{if(!unlocked&&KEYS.includes(e.key))e.preventDefault()});
  root.classList.add('locked');try{history.scrollRestoration='manual'}catch(e){}scrollTo(0,0);
- v.addEventListener('playing',()=>{started=true},{once:true});v.addEventListener('ended',unlock);v.addEventListener('error',unlock);
- const src=v.querySelector('source');if(src)src.addEventListener('error',unlock);
+ const setVideo=(keepTime)=>{const t=keepTime?v.currentTime:0,was=keepTime&&!v.paused;intro.classList.toggle('vid-port',portOK&&mode==='port');
+  v.src=cur().video;v.load();if(keepTime)v.addEventListener('loadedmetadata',()=>{try{v.currentTime=t}catch(e){}if(was){const p=v.play();if(p&&p.catch)p.catch(()=>{})}},{once:true})};
+ v.addEventListener('playing',()=>{started=true},{once:true});v.addEventListener('ended',unlock);
+ v.addEventListener('error',()=>{if(mode==='port'&&portOK&&!unlocked){portOK=false;setVideo(false);if(playing)v.play().catch(unlock);return}unlock()});   /* mobile file missing -> landscape video */
+ const swap=()=>{const m=mqPortrait.matches?'port':'land';if(m===mode||unlocked)return;mode=m;setVideo(started)};   /* orientation / viewport change */
+ (mqPortrait.addEventListener?mqPortrait.addEventListener('change',swap):mqPortrait.addListener(swap));
+ setVideo(false);
  const wait=ms=>new Promise(r=>setTimeout(r,ms));
  async function run(sound){
   gate.classList.add('gone');
@@ -24,7 +31,7 @@
   await wait(500);credit.classList.add('show');          /* fade in */
   await wait(1600+2000);credit.classList.add('out');     /* hold ~2s, then it drops away */
   await wait(900+500);                                   /* ~0.5s of pure black */
-  cover.classList.add('gone');
+  cover.classList.add('gone');playing=true;
   const p=v.play();if(p&&p.catch)p.catch(unlock);
   setTimeout(()=>{if(!started)unlock()},6000)}
  $('#enterSound').onclick=()=>run(true);$('#enterMuted').onclick=()=>run(false);$('#enterSound').focus();})();
