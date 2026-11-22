@@ -1,14 +1,13 @@
-/* Extras on every page: drive mode, mascot, local chat guide. Also compare + quiz pages. */
 const CFG=window.SITE_CONFIG||{};
 document.addEventListener('DOMContentLoaded',()=>{
- /* ---------- drive mode ---------- */
+ /* drive mode */
  const setMode=m=>{document.documentElement.dataset.mode=m;try{localStorage.setItem('bmw-mode',m)}catch(e){}$$('.dock [data-mode]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.mode===m))};
  let mode='sport';try{mode=localStorage.getItem('bmw-mode')||'sport'}catch(e){}
  const dock=document.createElement('div');dock.className='dock';
  dock.innerHTML=`<div class="modes" role="group" aria-label="Drive mode">${['comfort','sport','track'].map(m=>`<button data-mode="${m}" aria-pressed="false">${m}</button>`).join('')}</div><button id="dkMas" aria-pressed="true">Mascot</button><button class="ask" id="dkChat">Ask BMWorld</button>`;
  document.body.append(dock);setMode(mode);
  dock.querySelector('.modes').onclick=e=>{const b=e.target.closest('[data-mode]');if(b)setMode(b.dataset.mode)};
- /* ---------- mascot ---------- */
+ /* mascot */
  const still=matchMedia('(prefers-reduced-motion:reduce)').matches;
  if(!still){
   const svg='<svg viewBox="0 0 160 60" aria-label="Mascot car"><path d="M6 40 L10 30 Q18 26 40 24 L62 10 Q70 7 88 7 L112 9 Q124 12 134 26 L150 30 Q156 34 155 42 L150 46 H6Z" fill="#0066B1"/><path d="M66 13 L88 11 L108 12 Q116 14 122 24 H60Z" fill="#0b1b2b"/><rect x="6" y="40" width="148" height="4" fill="#E51A24"/><circle cx="38" cy="46" r="10" fill="#08080A" stroke="#8E929E" stroke-width="3"/><circle cx="124" cy="46" r="10" fill="#08080A" stroke="#8E929E" stroke-width="3"/><rect x="146" y="32" width="8" height="4" fill="#fff"/></svg>';
@@ -34,7 +33,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     el.style.transform=`translateX(${x}px)`;car.style.transform=`scaleX(${s}) rotate(${ang*s}deg)`}
    requestAnimationFrame(loop)};requestAnimationFrame(loop)}
  else $('#dkMas').remove();
- /* ---------- chat guide ---------- */
+ /* chat guide */
  const chat=document.createElement('div');chat.className='chat';chat.hidden=true;
  chat.innerHTML=`<header><span>BMWorld guide</span><button aria-label="Close chat">&times;</button></header><div class="msgs" id="msgs" aria-live="polite"></div><div class="sug" id="sug"></div><form id="cform"><input id="cin" placeholder="Ask about a model..." autocomplete="off" aria-label="Your question"><button class="btn btn-m" type="submit">Send</button></form>`;
  document.body.append(chat);
@@ -70,14 +69,14 @@ document.addEventListener('DOMContentLoaded',()=>{
   if(CFG.CHAT_ENDPOINT){try{const m=findModel(norm(q))||last,r=await fetch(CFG.CHAT_ENDPOINT,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({message:q,context:m||{}})});const d=await r.json();if(d.reply){if(m)last=m;w.textContent=d.reply;return}}catch(e){}}
   w.innerHTML=local(q);msgs.scrollTop=msgs.scrollHeight}
 });
-/* ---------- compare page ---------- */
+/* compare page */
 function comparePage(){const q=new URLSearchParams(location.search),A=$('#cmpA'),B=$('#cmpB'),opts=MODELS.map(m=>`<option value="${m.slug}">${esc(m.name)}</option>`).join('');A.innerHTML=opts;B.innerHTML=opts;
  A.value=bySlug(q.get('a'))?q.get('a'):'m4-competition';B.value=bySlug(q.get('b'))?q.get('b'):(A.value==='e30-m3'?'m4-competition':'e30-m3');
  const rows=[['Generation','gen'],['Production','years'],['Engine','e'],['Engine code','ec'],['Displacement','dp'],['Power','pw'],['Torque','tq'],['Top speed','ts'],['Acceleration','ac'],['Transmission','tr'],['Drive','dr']];
  const draw=()=>{const a=bySlug(A.value),b=bySlug(B.value);history.replaceState(null,'',`compare.html?a=${a.slug}&b=${b.slug}`);
   $('#cmpOut').innerHTML=`<div class="cmp-h"><div></div>${[a,b].map(m=>`<div><div class="im">${cover(m)}</div><h4><a href="model.html?model=${m.slug}">${esc(m.name)}</a></h4></div>`).join('')}</div><table class="cmp">${rows.map(r=>`<tr><th>${r[0]}</th><td>${spec(a[r[1]])}</td><td>${spec(b[r[1]])}</td></tr>`).join('')}</table>`};
  A.onchange=draw;B.onchange=draw;draw()}
-/* ---------- quiz page ---------- */
+/* quiz page */
 const QUIZ=[
 {q:"Pick your ideal road.",a:[["A winding mountain pass",{"m2":2,"m4-competition":2,"1m-coupe":1,"e30-m3":1}],["The autobahn at night",{"m5-cs":2,"m8-competition":2,"760i-xdrive":1}],["An empty coast road, roof down",{"z8":2,"i8-roadster":1,"3-0-csl":1}]]},
 {q:"Which era is yours?",a:[["The 70s and 80s",{"3-0-csl":2,"2002-turbo":2,"m1":2,"e30-m3":2,"m635csi":2}],["The 2000s",{"z8":2,"1m-coupe":2}],["Today and tomorrow",{"m4-competition":2,"i8-roadster":1,"xm":2,"m2":2,"760i-xdrive":1}]]},
