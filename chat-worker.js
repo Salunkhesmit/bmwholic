@@ -1,6 +1,3 @@
-/* OPTIONAL real-AI proxy for Cloudflare Workers. The API key lives in the Worker secret, never in the website.
-   Deploy: wrangler secret put ANTHROPIC_API_KEY, then paste the Worker URL into config.js (CHAT_ENDPOINT).
-   Set ALLOWED to your site's origin. Add rate limiting before sharing publicly: every message costs money. */
 const ALLOWED="https://YOUR-NAME.github.io";
 export default{async fetch(req,env){
  const cors={"Access-Control-Allow-Origin":ALLOWED,"Access-Control-Allow-Headers":"content-type","Access-Control-Allow-Methods":"POST"};
