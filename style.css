@@ -61,16 +61,16 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
 .stage{border:1px solid var(--line);border-radius:8px;min-height:50vh;aspect-ratio:16/9;display:grid;place-items:center;color:var(--mute);background:radial-gradient(circle at 50% 40%,#181A1F,#0a0a0c)}.stage canvas{width:100%;height:100%;display:block}
 /* ---- intro sequence ---- */
 .intro video{opacity:1}.intro-still{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}@media(orientation:portrait){.intro:not(.vid-port) .intro-still{object-fit:contain}}
-.cover,.gate,.credit{position:absolute;inset:0;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;transition:opacity .35s ease}
-.cover{z-index:3}.cover.gone{opacity:0;pointer-events:none}
-.gate{z-index:6}.gate.gone{opacity:0;pointer-events:none}.gate-alt{background:none;border:0;color:var(--mute);font:500 .8rem var(--f-m);letter-spacing:.08em;padding:.5rem}.gate-alt:hover{color:#fff}
-.credit{z-index:5;background:transparent;pointer-events:none}.credit p{font:500 clamp(1rem,2.4vw,1.5rem) var(--f-h);letter-spacing:.2em;text-transform:uppercase;color:#fff;margin:0;opacity:0;transform:translateY(0);transition:opacity 1.6s ease,transform .9s cubic-bezier(.5,0,.8,.4)}
-.credit.show p{opacity:1}.credit.out p{opacity:0;transform:translateY(90px);transition:opacity .9s ease,transform .9s cubic-bezier(.5,0,.8,.4)}
+.cover,.credit{position:absolute;inset:0;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;transition:opacity .35s ease}
+.cover{z-index:3;transition:opacity .7s ease}.cover.gone{opacity:0;pointer-events:none}
+.credit{z-index:5;background:transparent;pointer-events:none}.credit p{font:500 clamp(1rem,2.4vw,1.5rem) var(--f-h);letter-spacing:.34em;text-transform:uppercase;color:#fff;margin:0;opacity:0;transform:translateY(10px);transition:opacity .5s ease,transform .7s cubic-bezier(.2,.7,.2,1),letter-spacing .9s cubic-bezier(.2,.7,.2,1)}
+.credit-line{display:block;width:0;height:1px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);transition:width .9s cubic-bezier(.2,.7,.2,1) .1s,opacity .6s ease}
+.credit.show p{opacity:1;transform:none;letter-spacing:.2em}.credit.show .credit-line{width:min(240px,55vw)}
+.credit.out p{opacity:0;transform:translateY(-8px);letter-spacing:.26em;transition:opacity .6s ease,transform .7s ease,letter-spacing .7s ease}.credit.out .credit-line{opacity:0}
 .intro-text{z-index:2}
-/* ---- drive modes: recolour the whole site ---- */
-html[data-mode=comfort]{--blue:#00A3E0;--cyan:#81cfff}html[data-mode=track]{--blue:#E51A24;--cyan:#ff5a63}
+/* ---- drive modes: see the DRIVE MODES layer at the end of this file ---- */
 /* ---- dock, chat, mascot ---- */
-.has-intro:not(.ended) .dock,.has-intro:not(.ended) .mascot,.has-intro:not(.ended) .chat{display:none}
+.has-intro:not(.ended) .dock,.has-intro:not(.ended) .mascot,.has-intro:not(.ended) .chat,.has-intro:not(.ended) .prog,.has-intro:not(.ended) .hud,.has-intro:not(.ended) .puff{display:none}
 .dock{position:fixed;right:1rem;bottom:1rem;z-index:60;display:flex;gap:.4rem;flex-wrap:wrap;justify-content:flex-end;max-width:calc(100vw - 2rem)}
 .dock button{background:rgba(18,19,22,.85);backdrop-filter:blur(16px);color:#e5e1e4;border:1px solid var(--line);border-radius:4px;padding:.45rem .7rem;font:500 .72rem var(--f-m);letter-spacing:.06em;text-transform:uppercase}
 .dock button:hover,.dock [aria-pressed=true]{border-color:var(--cyan);color:#fff}.dock .modes{display:flex;gap:.2rem}.dock .ask{background:var(--blue);border-color:rgba(255,255,255,.3);color:#fff}
@@ -79,8 +79,17 @@ html[data-mode=comfort]{--blue:#00A3E0;--cyan:#81cfff}html[data-mode=track]{--bl
 .chat .msgs{flex:1;overflow-y:auto;padding:1rem;display:flex;flex-direction:column;gap:.6rem}.msg{max-width:88%;padding:.6rem .8rem;border-radius:6px;font-size:.88rem;line-height:1.45;background:var(--card)}.msg.me{align-self:flex-end;background:var(--blue)}.msg a{color:var(--cyan)}
 .chat .sug{display:flex;gap:.4rem;flex-wrap:wrap;padding:0 1rem .6rem}.chat .sug button{font-size:.72rem;padding:.25rem .6rem;border-radius:4px;border:1px solid var(--line);background:var(--st);color:var(--mute)}
 .chat form{display:flex;gap:.5rem;padding:.7rem;border-top:1px solid var(--line)}.chat input{flex:1;background:#0D0E11;border:1px solid var(--line);color:#fff;border-radius:4px;padding:.5rem .7rem}.chat input:focus{border-color:var(--blue);outline:0}
-.mascot{position:fixed;left:0;bottom:2px;z-index:40;pointer-events:none;will-change:transform}.mascot .car{width:110px;pointer-events:auto;cursor:pointer;display:block}.mascot .car svg,.mascot .car img{width:100%;display:block}
-.puff{position:fixed;z-index:39;width:14px;height:14px;border-radius:50%;background:rgba(200,205,215,.55);pointer-events:none;animation:puff .8s ease-out forwards}@keyframes puff{to{transform:translate(var(--dx),-26px) scale(3.2);opacity:0}}
+/* mascot: positioned and animated by extras.js (translate + 3D yaw). It never takes pointer events, so scrolling and taps pass straight through. */
+.mascot{position:fixed;left:0;bottom:2px;z-index:40;pointer-events:none;will-change:transform;transform:translate3d(110vw,0,0)}
+.mascot .car{position:relative;width:110px;display:block;perspective:640px;pointer-events:none}
+.mascot .bd{transform-origin:50% 85%;will-change:transform}.mascot .bd svg,.mascot .bd img{width:100%;display:block;overflow:visible}
+.mascot .sh{position:absolute;left:10%;right:10%;bottom:-2px;height:6px;border-radius:50%;background:rgba(0,0,0,.6);z-index:-1}
+.mascot .trl{position:absolute;bottom:20%;height:3px;width:96px;opacity:0;border-radius:2px}
+.mascot .trl.rt{left:100%;background:linear-gradient(90deg,var(--cyan),transparent)}.mascot .trl.lt{right:100%;background:linear-gradient(270deg,var(--cyan),transparent)}
+html[data-mode=comfort] .mascot .trl{display:none}
+.mascot .cb{fill:var(--car-body)}.mascot .cg{fill:#0b1b2b}.mascot .c1{fill:var(--s1)}.mascot .c2{fill:var(--s2)}.mascot .c3{fill:var(--s3)}.mascot .wing{fill:#16161a}
+.mascot .cb,.mascot .c1,.mascot .c2,.mascot .c3{transition:fill .8s ease}.mascot .trk{display:none}
+.puff{position:fixed;left:0;top:0;z-index:39;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;background:radial-gradient(circle,var(--smoke) 0,transparent 68%);opacity:0;pointer-events:none;will-change:transform,opacity}
 @media(max-width:576px){.mascot .car{width:80px}.dock button{padding:.4rem .5rem}}
 /* ---- compare & quiz ---- */
 .cmp{width:100%;border-collapse:collapse}.cmp th,.cmp td{padding:.6rem .7rem;border-bottom:1px solid rgba(35,37,43,.6);vertical-align:top;font-size:.9rem}.cmp th{color:var(--mute);font-weight:400;width:24%}.cmp td{font-family:var(--f-m)}.cmp-h{display:grid;grid-template-columns:24% 1fr 1fr;gap:.7rem;margin-bottom:1rem}.cmp-h .im{aspect-ratio:16/10;border-radius:8px;overflow:hidden;border:1px solid var(--line)}.cmp-h h4{margin:.5rem 0 0;font-size:1.1rem}
@@ -100,10 +109,7 @@ html[data-mode=comfort]{--blue:#00A3E0;--cyan:#81cfff}html[data-mode=track]{--bl
 @media(min-width:992px){.snd-btn{order:5;margin:0 0 0 .9rem}.navbar-collapse{order:2}}
 .dock .ask{text-transform:none;letter-spacing:.02em}
 
-/* =====================================================================
-   RESPONSIVE LAYER  (desktop look is unchanged; everything below only adapts)
-   Breakpoints: >=1440 large desktop | 1024-1439 laptop | 768-1023 tablet | 375-767 mobile | 320-374 small mobile
-   ===================================================================== */
+/* RESPONSIVE LAYER -> Breakpoints: >=1440 large desktop | 1024-1439 laptop | 768-1023 tablet | 375-767 mobile | 320-374 small mobile */
 body{overflow-x:clip}img,video,canvas{max-width:100%}
 .lead{font-size:clamp(1rem,2.6vw,1.25rem)}
 .btn-m,.btn-glass{min-height:44px;display:inline-flex;align-items:center;justify-content:center;text-align:center}
@@ -160,7 +166,6 @@ body{overflow-x:clip}img,video,canvas{max-width:100%}
  .rules li{flex-direction:column;gap:.15rem}.rules span{text-align:left}
  .sg dl>div{flex-wrap:wrap;row-gap:.1rem}
  .cmp-h{grid-template-columns:24% minmax(0,1fr) minmax(0,1fr);gap:.4rem}.cmp-h h4{font-size:.9rem;overflow-wrap:anywhere}.cmp-h .noimg{font-size:.6rem;padding:.25rem}.cmp{table-layout:fixed}.cmp th{width:24%;font-size:.68rem;overflow-wrap:normal;word-break:normal;hyphens:auto}.cmp td{padding:.45rem .35rem;font-size:.76rem;overflow-wrap:anywhere}
- .gate{padding:0 1rem}.gate .btn-m{width:min(100%,320px)}
  /* category chips become a swipeable strip */
  .chips{flex-wrap:nowrap;overflow-x:auto;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin:1.25rem -.75rem;padding:0 .75rem;-webkit-mask-image:linear-gradient(90deg,#000 92%,transparent);mask-image:linear-gradient(90deg,#000 92%,transparent)}
  .chips::-webkit-scrollbar{display:none}.chip{flex:0 0 auto;scroll-snap-align:start;white-space:nowrap}
@@ -177,3 +182,93 @@ body{overflow-x:clip}img,video,canvas{max-width:100%}
  .intro-text{padding-bottom:1rem}.intro-text h1{font-size:clamp(1.8rem,7vh,3rem)}.intro-text p{margin:.25rem 0 .6rem}.scroll-cue i{height:20px}
  .page-top{padding-top:4.5rem}.mascot{display:none}
 }
+/* DRIVE MODES  (Comfort / Sport / Track) */
+@property --bg{syntax:'<color>';inherits:true;initial-value:#08080A}
+@property --st{syntax:'<color>';inherits:true;initial-value:#121316}
+@property --card{syntax:'<color>';inherits:true;initial-value:#181A1F}
+@property --line{syntax:'<color>';inherits:true;initial-value:#23252B}
+@property --blue{syntax:'<color>';inherits:true;initial-value:#0066B1}
+@property --cyan{syntax:'<color>';inherits:true;initial-value:#00A3E0}
+@property --accent2{syntax:'<color>';inherits:true;initial-value:#E51A24}
+@property --r-card{syntax:'<length>';inherits:true;initial-value:8px}
+@property --r-btn{syntax:'<length>';inherits:true;initial-value:4px}
+html{--tm:.8s;transition:--bg var(--tm) ease,--st var(--tm) ease,--card var(--tm) ease,--line var(--tm) ease,--blue var(--tm) ease,--cyan var(--tm) ease,--accent2 var(--tm) ease,--r-card var(--tm) ease,--r-btn var(--tm) ease}
+:root{--r-card:8px;--r-btn:4px;--accent2:#E51A24;--glow:rgba(0,102,177,.45);--dur:.26s;--ease:cubic-bezier(.2,.9,.25,1);--rv-x:-28px;--rv-y:0px;--rv-t:.4s;
+ --car-body:#0066B1;--s1:#81C4FF;--s2:#0066B1;--s3:#E51A24;--smoke:rgba(214,222,235,.62)}
+html[data-mode=comfort]{--bg:#0b0d11;--st:#10141b;--card:#151a23;--line:#232b38;--blue:#3d8fd1;--cyan:#9fd3f5;--accent2:#b9c6d6;--r-card:14px;--r-btn:999px;
+ --glow:rgba(125,185,235,.26);--dur:.8s;--ease:cubic-bezier(.22,.61,.36,1);--rv-x:0px;--rv-y:18px;--rv-t:.95s;
+ --car-body:#7e93ab;--s1:#c3cfdc;--s2:#c3cfdc;--s3:#c3cfdc;--smoke:rgba(236,241,248,.5)}
+html[data-mode=sport]{--blue:#0066B1;--cyan:#00A3E0;--accent2:#E51A24}
+html[data-mode=track]{--bg:#050506;--st:#0c0c0e;--card:#101012;--line:#2b1a1d;--blue:#E51A24;--cyan:#ff4d57;--accent2:#f4f5f7;--r-card:0px;--r-btn:0px;
+ --glow:rgba(229,26,36,.45);--dur:.16s;--ease:cubic-bezier(.7,0,.2,1);--rv-x:-44px;--rv-y:0px;--rv-t:.28s;
+ --car-body:#f1f2f4;--s1:#E51A24;--s2:#16161a;--s3:#E51A24;--smoke:rgba(190,196,205,.74)}
+
+/* shape and pacing */
+.card-m,.frame,.cr,.gal,.viewer,.stage,.modal-content,.chat,.cmp-h .im{border-radius:var(--r-card)}
+.btn-m,.btn-glass,.chip,.dock button,.snd-btn{border-radius:var(--r-btn)}
+.quiz .opt{border-radius:calc(var(--r-card)*.6)}
+.card-m,.btn-m,.btn-glass,.chip,.gal,.quiz .opt,.snd-btn,.dock button,.nav-link{transition-duration:var(--dur);transition-timing-function:var(--ease)}
+.cr-s{transition-duration:calc(var(--dur)*1.5);transition-timing-function:var(--ease)}
+
+/* atmosphere: soft light (comfort), blue/red light (sport), carbon + red vignette (track) */
+body::before,body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none}
+html[data-mode=comfort] body::before{background:radial-gradient(70vw 42vh at 50% -8%,rgba(125,185,235,.15),transparent 70%),radial-gradient(45vw 32vh at 100% 100%,rgba(125,185,235,.07),transparent 70%)}
+html[data-mode=sport] body::before{background:radial-gradient(55vw 38vh at 0% 0%,rgba(0,102,177,.15),transparent 70%),radial-gradient(42vw 30vh at 100% 100%,rgba(229,26,36,.08),transparent 70%)}
+html[data-mode=track] body::before{background:radial-gradient(90vw 46vh at 50% 125%,rgba(229,26,36,.16),transparent 72%)}
+body::after{opacity:0;transition:opacity .8s ease;background:repeating-linear-gradient(45deg,rgba(255,255,255,.022) 0 2px,transparent 2px 6px),repeating-linear-gradient(-45deg,rgba(255,255,255,.015) 0 2px,transparent 2px 6px)}
+html[data-mode=track] body::after{opacity:1}
+.has-intro:not(.ended) body::before,.has-intro:not(.ended) body::after{display:none}
+
+/* navigation edge: hairline glow (comfort), M tri-colour (sport), kerb stripe (track) */
+.site-nav::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;pointer-events:none}
+html[data-mode=comfort] .site-nav{background:rgba(16,20,27,.72);box-shadow:0 10px 40px -24px var(--glow)}
+html[data-mode=comfort] .site-nav::after{height:1px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);opacity:.5}
+html[data-mode=sport] .site-nav::after{background:linear-gradient(90deg,#81C4FF 0 33.3%,#0066B1 33.3% 66.6%,#E51A24 66.6%)}
+html[data-mode=track] .site-nav::after{height:3px;background:repeating-linear-gradient(90deg,var(--blue) 0 14px,#fff 14px 28px)}
+
+/* comfort: calm, rounded, soft light */
+html[data-mode=comfort] .btn-m{box-shadow:0 10px 28px -12px var(--glow)}
+html[data-mode=comfort] .card-m:hover{border-color:var(--cyan);box-shadow:0 22px 56px -22px var(--glow)}
+html[data-mode=comfort] .card-m{border-color:transparent;background:linear-gradient(180deg,rgba(255,255,255,.025),transparent),var(--card)}
+/* sport: sharp, blue with a red edge */
+html[data-mode=sport] .card-m:hover{box-shadow:0 0 32px var(--glow),inset 3px 0 0 var(--accent2)}
+html[data-mode=sport] .btn-m:hover{box-shadow:0 0 32px var(--glow),0 3px 0 var(--accent2)}
+html[data-mode=sport] .chip.on{border-color:var(--accent2)}
+/* track: chamfered, carbon, telemetry */
+html[data-mode=track] .card-m,html[data-mode=track] .btn-m,html[data-mode=track] .btn-glass{clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,12px 100%,0 calc(100% - 12px))}
+html[data-mode=track] .chip,html[data-mode=track] .dock button{clip-path:polygon(0 0,calc(100% - 7px) 0,100% 7px,100% 100%,7px 100%,0 calc(100% - 7px))}
+html[data-mode=track] .card-m:hover{box-shadow:inset 0 0 0 1px var(--blue),inset 4px 0 0 var(--blue);background:#15090b}
+html[data-mode=track] .btn-m:hover{box-shadow:none;background:#ff2a35}
+html[data-mode=track] .card-m:focus-visible,html[data-mode=track] .btn-m:focus-visible,html[data-mode=track] .btn-glass:focus-visible,html[data-mode=track] .chip:focus-visible,html[data-mode=track] .dock button:focus-visible{outline-offset:-4px}
+html[data-mode=track] .page-top h1,html[data-mode=track] main h2{text-transform:uppercase;letter-spacing:.01em}
+html[data-mode=track] .btn-m,html[data-mode=track] .btn-glass{text-transform:uppercase;letter-spacing:.08em;font-size:.85rem}
+html[data-mode=track] .tl button.on{border-color:var(--blue)}
+
+/* scroll progress (sport, track) and telemetry HUD (track, tablet/desktop only) */
+.prog{position:fixed;top:0;left:0;right:0;height:2px;z-index:75;transform-origin:0 50%;transform:scaleX(0);background:linear-gradient(90deg,#81C4FF,#0066B1,#E51A24);pointer-events:none;opacity:0;transition:opacity var(--dur)}
+html[data-mode=sport] .prog,html[data-mode=track] .prog{opacity:1}html[data-mode=track] .prog{height:3px;background:var(--blue)}
+.hud{position:fixed;top:68px;right:12px;z-index:55;display:none;align-items:center;gap:.8rem;pointer-events:none;font:600 .66rem var(--f-m);letter-spacing:.1em;text-transform:uppercase;color:#c9ccd3;background:rgba(5,5,6,.78);border:1px solid var(--line);padding:.4rem .7rem;clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px))}
+html[data-mode=track] .hud{display:flex}
+.hud b{display:inline-block;min-width:3ch;text-align:right;font-weight:700;color:#fff}
+.hud .rev{display:flex;gap:2px}.hud .rev i{width:5px;height:11px;background:#25252a;transition:background .1s}
+.hud .rev i.on{background:#3ddc84}.hud .rev i.on.y{background:#ffc400}.hud .rev i.on.r{background:var(--blue)}
+@media(max-width:767.98px){html[data-mode=track] .hud{display:none}}
+
+/* mode-switch transition: soft bloom (comfort), blue/red slash (sport), hazard shutter (track) */
+.mwipe{position:fixed;inset:0;z-index:95;pointer-events:none;visibility:hidden}.mwipe.go{visibility:visible}
+.mwipe[data-m=comfort]{background:radial-gradient(70vmax 70vmax at 50% 40%,rgba(159,211,245,.3),transparent 70%);animation:wpC .9s ease both}
+.mwipe[data-m=sport]{background:linear-gradient(105deg,transparent 0 30%,#0066B1 30% 48%,#fff 48% 50%,#E51A24 50% 66%,transparent 66%);animation:wpS .55s cubic-bezier(.7,0,.2,1) both}
+.mwipe[data-m=track]{background:repeating-linear-gradient(135deg,rgba(229,26,36,.55) 0 18px,rgba(5,5,6,.7) 18px 36px);animation:wpT .5s cubic-bezier(.7,0,.2,1) both}
+@keyframes wpC{0%{opacity:0}35%{opacity:1}100%{opacity:0}}
+@keyframes wpS{from{transform:translateX(-110%)}to{transform:translateX(110%)}}
+@keyframes wpT{0%{clip-path:inset(0 100% 0 0)}50%{clip-path:inset(0 0 0 0)}100%{clip-path:inset(0 0 0 100%)}}
+
+/* scroll reveal (classes are added by extras.js and removed again once the element is in) */
+.rv{opacity:0;transform:translate(var(--rv-x),var(--rv-y));transition:opacity var(--rv-t) var(--ease),transform var(--rv-t) var(--ease)}
+.rv.rv-in{opacity:1;transform:none}
+
+/* Three.js interlude band (fx.js). Decorative: no pointer events, so it never blocks scrolling or taps. */
+.fx-band{position:relative;height:clamp(170px,26vw,250px);margin:clamp(1.5rem,5vw,3rem) 0;overflow:hidden;opacity:0;transition:opacity 1s ease;pointer-events:none}
+.fx-band.in{opacity:1}
+.fx-band::before{content:"";position:absolute;left:0;right:0;top:50%;height:1px;background:linear-gradient(90deg,transparent,var(--blue) 30%,var(--blue) 70%,transparent);opacity:.5}
+.fx-band canvas{position:relative;display:block;width:100%;height:100%}
