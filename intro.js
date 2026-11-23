@@ -1,4 +1,4 @@
-(()=>{const $=s=>document.querySelector(s),root=document.documentElement,body=document.body,v=$('#introVideo'),gate=$('#gate'),credit=$('#credit'),cover=$('#cover'),intro=$('#home');
+(()=>{const $=s=>document.querySelector(s),root=document.documentElement,body=document.body,v=$('#introVideo'),credit=$('#credit'),cover=$('#cover'),intro=$('#home');
  /* Skip only for in-site navigation (link/back from another BMWorld page). Reload, hard refresh, typed URL, bookmark or new tab always replay. */
  let seen=false;try{const nav=(performance.getEntriesByType('navigation')[0]||{}).type;let ref=false;try{ref=!!document.referrer&&new URL(document.referrer).origin===location.origin}catch(e){}
   seen=nav==='back_forward'||(nav==='navigate'&&ref)}catch(e){}
@@ -10,7 +10,8 @@
  const still=img=>{img.onerror=()=>{if(img.getAttribute('src')!==SRC.land.poster){img.onerror=null;intro.classList.remove('vid-port');img.src=SRC.land.poster}}};
  function unlock(){if(unlocked)return;unlocked=true;
   if(!v.ended){v.pause();v.poster=poster()}                 /* failure path: show the final frame */
-  gate.remove();credit.remove();cover.remove();body.classList.add('ended');root.classList.remove('locked')}
+  credit.remove();cover.remove();body.classList.add('ended');root.classList.remove('locked');
+  document.dispatchEvent(new Event('bmw:intro-end'))}       /* the mascot waits for this before it starts */
  if(seen){intro.classList.toggle('vid-port',mode==='port');const i=new Image();still(i);i.src=poster();i.alt='';i.className='intro-still';v.replaceWith(i);unlocked=false;v.ended=true;unlock();return}
  const block=e=>{if(!unlocked)e.preventDefault()},KEYS=['ArrowUp','ArrowDown','PageUp','PageDown','Home','End',' ','Spacebar'];
  addEventListener('wheel',block,{passive:false});addEventListener('touchmove',block,{passive:false});
@@ -24,14 +25,13 @@
  (mqPortrait.addEventListener?mqPortrait.addEventListener('change',swap):mqPortrait.addListener(swap));
  setVideo(false);
  const wait=ms=>new Promise(r=>setTimeout(r,ms));
- async function run(sound){
-  gate.classList.add('gone');
-  v.muted=true;try{await v.play();v.pause();v.currentTime=0}catch(e){}   /* inside the click: unlocks audio playback */
-  v.muted=!sound;
-  await wait(500);credit.classList.add('show');          /* fade in */
-  await wait(1600+2000);credit.classList.add('out');     /* hold ~2s, then it drops away */
-  await wait(900+500);                                   /* ~0.5s of pure black */
+ /* Opening: the developer credit fades in, stays fully visible for ~1s, glides away, then the intro video starts (always muted: no engine audio autoplays). */
+ async function run(){
+  v.muted=true;
+  await wait(250);credit.classList.add('show');          /* fade in (0.5s) */
+  await wait(500+1000);credit.classList.add('out');      /* ~1s fully visible, then the exit transition */
+  await wait(700);                                       /* exit finishes before the video appears */
   cover.classList.add('gone');playing=true;
-  const p=v.play();if(p&&p.catch)p.catch(unlock);
+  const p=v.play();if(p&&p.catch)p.catch(unlock);        /* autoplay refused -> show the final frame instead of a stuck screen */
   setTimeout(()=>{if(!started)unlock()},6000)}
- $('#enterSound').onclick=()=>run(true);$('#enterMuted').onclick=()=>run(false);$('#enterSound').focus();})();
+ run()})();
