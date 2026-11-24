@@ -10,9 +10,11 @@
 </head>
 <body data-page="models" class="">
 <div id="hdr"></div>
-<main class="page-top "><div class="container"><h1>Explore BMW models</h1><p class="lead">Choose a series, then open a card for the full details page.</p><div class="chips" id="modelChips" role="group" aria-label="Model categories"></div><div class="row g-3" id="modelGrid"></div><p class="empty d-none" id="modelEmpty">No models in this series yet. Add one in models.js.</p></div></main>
+<main class="page-top "><div class="container"><h1>Explore BMW models</h1><p class="lead">The 79-model BMW catalogue in chronological order. Search, pick an era or a family, then open a card for the details page.</p>
+<div class="msearch"><label class="visually-hidden" for="modelSearch">Search models</label><input id="modelSearch" type="search" class="form-control" placeholder="Search name, chassis code or year, e.g. E46, M3, 1972" autocomplete="off"><span id="modelCount" class="note" aria-live="polite"></span></div>
+<div class="chips" id="eraChips" role="group" aria-label="Eras"></div><div class="chips" id="modelChips" role="group" aria-label="Model families"></div><div class="row g-3" id="modelGrid"></div><p class="empty d-none" id="modelEmpty">No model matches that search. Clear the search or choose another era or family.</p></div></main>
 <div id="ftr"></div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="config.js"></script><script src="images.js"></script><script src="content.js"></script><script src="models.js"></script><script src="common.js"></script><script src="pages.js"></script><script src="extras.js"></script>
+<script src="config.js"></script><script src="images.js"></script><script src="content.js"></script><script src="models.js"></script><script src="common.js"></script><script src="pages.js"></script><script src="knowledge.js"></script><script src="chat-engine.js"></script><script src="extras.js"></script><script src="scenes.js"></script>
 </body>
 </html>
