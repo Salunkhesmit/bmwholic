@@ -23,18 +23,13 @@ const REMOTE={
 const imgSrc=k=>LOCAL[k]||REMOTE[k]||(/^(https?:)?\/\/|^[\w./-]+\.(jpe?g|png|webp|avif|gif|svg)$/i.test(k||"")?k:"");
 
 const MODEL_IMAGES={
- "m4-competition":["m4-night","m4-studio","m4-garage","hero","brakes"],
- "e30-m3":["e30-m3","","",""],
- "2002-turbo":["t2002","csl-pair","",""],
- "3-0-csl":["csl","csl-pair","",""],
- "1m-coupe":["","","",""],
- "m2":["","","",""],
- "m5-cs":["m5cs","","",""],
- "m635csi":["","","",""],
- "760i-xdrive":["g70","","",""],
- "m8-competition":["","","",""],
- "xm":["","","",""],
+ "m4":["m4-night","m4-studio","m4-garage","hero","brakes"],
+ "m3":[{src:"e30-m3",alt:"BMW E30 M3 (first-generation M3)"},"","",""],
+ "2002":[{src:"t2002",alt:"BMW 2002 turbo"},"","",""],
+ "3-0-cs":[{src:"csl",alt:"BMW 3.0 CSL, the lightweight E9 coupe"},{src:"csl-pair",alt:"BMW 3.0 CSL and 2002 turbo"},"",""],
+ "m5":[{src:"m5cs",alt:"BMW M5 CS (F90)"},"","",""],
+ "7-series":[{src:"g70",alt:"BMW 7 Series (G70)"},"","",""],
  "z8":["z8","","",""],
  "m1":["m1","","",""],
- "i8-roadster":["i8","","",""]
+ "i8":[{src:"i8",alt:"BMW i8 Roadster"},"","",""]
 };
