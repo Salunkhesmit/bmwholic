@@ -1,6 +1,6 @@
 (()=>{
  const THREE_URL='https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
- const SPOT={home:'Go deeper',m:'Motorsport connections'};      /* the band goes right before this heading */
+ const SPOT={home:'Go deeper',m:'Motorsport connections'};
  const page=document.body.dataset.page;if(!SPOT[page])return;
  const hasGL=(()=>{try{const c=document.createElement('canvas');return !!(window.WebGLRenderingContext&&(c.getContext('webgl2')||c.getContext('webgl')))}catch(e){return false}})();
  if(!hasGL||!('IntersectionObserver' in window))return;
