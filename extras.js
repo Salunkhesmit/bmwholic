@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded',()=>{
  dock.querySelector('.modes').onclick=e=>{const b=e.target.closest('[data-mode]');if(b)setMode(b.dataset.mode,true)};
  addEventListener('storage',e=>{if(e.key==='bmw-mode'&&MODES.includes(e.newValue))setMode(e.newValue,false)});   /* another tab changed it */
 
- /* scroll progress */
+ /* scroll progress (sport, track) and telemetry HUD (track) */
  const prog=document.createElement('div');prog.className='prog';prog.setAttribute('aria-hidden','true');
  const hud=document.createElement('div');hud.className='hud';hud.setAttribute('aria-hidden','true');
  hud.innerHTML='<span class="rev">'+'<i></i>'.repeat(10)+'</span><span>SPD <b id="hSpd">0</b></span><span>LAP <b id="hLap">0</b>%</span><span>G <b id="hG">N</b></span>';
@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   const kick=()=>{if(!raf){lt=performance.now();raf=requestAnimationFrame(frame)}};
   addEventListener('scroll',kick,{passive:true});addEventListener('resize',kick);document.addEventListener('bmw:mode',kick);kick()}
 
- /* scroll reveal: (slow rise / sharp slide / quick snap) */
+ /* scroll reveal (slow rise / sharp slide / quick snap) */
  if(!reduce&&'IntersectionObserver' in window){
   const io=new IntersectionObserver(es=>es.forEach(e=>{if(!e.isIntersecting)return;const t=e.target;io.unobserve(t);t.classList.add('rv-in');setTimeout(()=>t.classList.remove('rv','rv-in'),1400)}),{threshold:.12,rootMargin:'0px 0px -6% 0px'});
   $$('.page-top h1,.page-top .lead,.sec h2,.sec .lead,.sec .frame,#featured .card-m,.portal,.about>div,.specs,.tl,.q').forEach(t=>{t.classList.add('rv');io.observe(t)})}
@@ -55,14 +55,14 @@ document.addEventListener('DOMContentLoaded',()=>{
   el.innerHTML='<div class="car"><i class="trl"></i><div class="bd"></div><i class="sh"></i></div>';document.body.append(el);
   const car=$('.car',el),bd=$('.bd',el),tl=$('.trl',el);
   bd.innerHTML=CFG.MASCOT_SRC?`<img src="${esc(CFG.MASCOT_SRC)}" alt="" onerror="this.outerHTML=''">`:SVG;
-  /* per-mode presentation; the order and the 10s wait never change, only pace and flair */
+
   const MC={comfort:{t:1.3,lean:5,rate:20,life:[1.3,2],a:.5,trail:0},sport:{t:1,lean:9,rate:34,life:[.9,1.5],a:.62,trail:.8},track:{t:.8,lean:13,rate:50,life:[1,1.7],a:.78,trail:1}};
   const TR=96,WAIT=10000,cl=(a,lo,hi)=>Math.min(hi,Math.max(lo,a)),ss=k=>k*k*(3-2*k);
   const bez=(x1,y1,x2,y2)=>{const cx=3*x1,bx=3*(x2-x1)-cx,ax=1-cx-bx,cy=3*y1,by=3*(y2-y1)-cy,ay=1-cy-by,X=t=>((ax*t+bx)*t+cx)*t,Y=t=>((ay*t+by)*t+cy)*t,D=t=>(3*ax*t+2*bx)*t+cx;
    return x=>{if(x<=0)return 0;if(x>=1)return 1;let t=x;for(let i=0;i<8;i++){const d=X(t)-x,s=D(t);if(Math.abs(d)<1e-4||Math.abs(s)<1e-6)break;t-=d/s}return Y(cl(t,0,1))}};
   const E1=bez(.32,0,.18,1);   /* slow start, strong middle, long gentle stop */
   const VW=()=>root.clientWidth||innerWidth,W=()=>car.offsetWidth||110,parkX=vw=>Math.round(cl(vw*.04,10,64));
-  /* smoke: a fixed pool of puffs that is recycled (no DOM churn, nothing left behind) */
+  /* smoke */
   const pool=Array.from({length:40},()=>{const e=document.createElement('i');e.className='puff';document.body.append(e);return{e,on:false,x:0,y:0,vx:0,vy:0,age:0,life:1,s:.5}});
   let live=0,acc=0,cfg=MC.sport,T12=3,Td=2,SET=.7;
   let phase='off',pt=0,x=0,yaw=180,lean=0,raf=0,last=0,wake=0,trailCls='';
@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   const kick=()=>{if(!raf){last=performance.now();raf=requestAnimationFrame(frame)}};
   const halt=()=>{cancelAnimationFrame(raf);raf=0;clearTimeout(wake);phase='off';el.dataset.phase='off';pool.forEach(p=>{p.on=false;p.e.style.opacity=0});live=0;acc=0;el.style.display='none'};
   const start=()=>{plan();el.style.display='';x=VW()+10;yaw=180;lean=0;setPhase('entry');draw(0);kick()};
-  /* when it may run: switched on, intro finished, and not on a short landscape phone (CSS hides it there) */
+
   const lsPhone=matchMedia('(max-height:480px) and (orientation:landscape)');
   let want=true,introOk=!document.body.classList.contains('has-intro')||document.body.classList.contains('ended');
   const sync=()=>{if(want&&introOk&&!lsPhone.matches){if(phase==='off')start()}else halt()};
@@ -102,55 +102,45 @@ document.addEventListener('DOMContentLoaded',()=>{
   halt();sync()}
 
  /* chat guide */
- const chat=document.createElement('div');chat.className='chat';chat.hidden=true;
- chat.innerHTML=`<header><span>BMWorld guide</span><button aria-label="Close chat">&times;</button></header><div class="msgs" id="msgs" aria-live="polite"></div><div class="sug" id="sug"></div><form id="cform"><input id="cin" placeholder="Ask about a model..." autocomplete="off" aria-label="Your question"><button class="btn btn-m" type="submit">Send</button></form>`;
+ BMWChat.init({models:MODELS,eras:ERAS,cats:CATS,timeline:TIMELINE,kb:BMW_KB});
+ const AI=!!CFG.CHAT_ENDPOINT;let st=BMWChat.newState(),hist=[],busy=false;
+ const chat=document.createElement('div');chat.className='chat';chat.hidden=true;chat.setAttribute('role','dialog');chat.setAttribute('aria-label','BMWorld guide');
+ chat.innerHTML=`<header><span>BMWorld guide<small id="cmode">${AI?'AI guide':'Offline guide: site data only'}</small></span><span class="hb"><button id="cnew" aria-label="Start a new chat" title="New chat">&#8635;</button><button id="cx" aria-label="Close chat">&times;</button></span></header><div class="msgs" id="msgs" aria-live="polite"></div><div class="sug" id="sug"></div><form id="cform"><input id="cin" placeholder="Ask about any BMW, a term or a comparison..." autocomplete="off" maxlength="400" aria-label="Your question"><button class="btn btn-m" type="submit">Send</button></form>`;
  document.body.append(chat);
- const msgs=$('#msgs',chat),say=(h,me)=>{const d=document.createElement('div');d.className='msg'+(me?' me':'');d.innerHTML=h;msgs.append(d);msgs.scrollTop=msgs.scrollHeight;return d};
- const SUG=['How much power does the M4 have?','Tell me about the E30 M3','Which are the classic BMWs?','Compare M4 and M5 CS','When was BMW founded?'];
- $('#sug',chat).innerHTML=SUG.map(s=>`<button>${s}</button>`).join('');
- const open=()=>{chat.hidden=false;if(!msgs.children.length)say('Hi! I answer from the cars and timeline on this site. Ask about power, torque, history or a series.');$('#cin').focus()};
- $('#dkChat').onclick=()=>chat.hidden?open():chat.hidden=true;$('button',chat.firstChild).onclick=()=>chat.hidden=true;
- $('#sug',chat).onclick=e=>{const b=e.target.closest('button');if(b)ask(b.textContent)};
- $('#cform').onsubmit=e=>{e.preventDefault();const v=$('#cin').value.trim();if(v){$('#cin').value='';ask(v)}};
- let last=null;
- const AL={'m4-competition':['m4','m4 competition','g82'],'e30-m3':['e30 m3','e30','m3'],'2002-turbo':['2002 turbo','2002'],'3-0-csl':['csl','3.0 csl','batmobile'],'1m-coupe':['1m','1 series m'],'m2':['m2','g87'],'m5-cs':['m5 cs','m5','f90'],'m635csi':['m635csi','m635','e24'],'760i-xdrive':['760i','760','g70'],'m8-competition':['m8','f92'],'xm':['xm','g09'],'z8':['z8','e52'],'m1':['m1','e26'],'i8-roadster':['i8','i15']};
- const norm=s=>s.toLowerCase().replace(/[^a-z0-9. ]/g,' ').replace(/\s+/g,' ').trim();
- const findModel=t=>{let best=null,bl=0;MODELS.forEach(m=>{(AL[m.slug]||[norm(m.name),m.slug.replace(/-/g,' ')]).forEach(a=>{if(a.length>bl&&new RegExp('(^| )'+a.replace(/\./g,'\\.')+'( |$)').test(t)){best=m;bl=a.length}})});return best};
- const link=m=>`<a href="model.html?model=${m.slug}">${esc(m.name)}</a>`;
- const FIELDS=[['hist',/history|story|background/,'History'],['facts',/fact|trivia/,'Facts'],['feat',/feature|special|engineering/,'Features'],['ec',/engine code|code/,'Engine code'],['tq',/torque|lb ft|nm/,'Torque'],['pw',/power|horsepower|hp|bhp/,'Power'],['ts',/top speed|fastest|vmax/,'Top speed'],['ac',/0 60|acceler|quick/,'0-60'],['tr',/gearbox|transmission|manual|automatic/,'Transmission'],['dr',/drive|awd|rwd|xdrive|wheel drive/,'Drive'],['dp',/displacement|litre|liter|cc/,'Displacement'],['e',/engine|motor/,'Engine'],['years',/year|when|production|built|made/,'Production'],['gen',/generation|chassis/,'Chassis']];
- const val=(m,k)=>{const v=k==='years'?m.years:m[k];return Array.isArray(v)?v.join(' ').replace(/\s+/g,' '):v};
- function local(q){const t=norm(q);if(/^(hi|hello|hey)\b/.test(t))return'Hello! Ask me about any model, for example "torque of the M5 CS".';
-  const cmp=t.match(/compare (.+?) (?:and|vs|with|to) (.+)/);if(cmp){const a=findModel(norm(cmp[1])),b=findModel(norm(cmp[2]));if(a&&b)return`Here you go: <a href="compare.html?a=${a.slug}&b=${b.slug}">${esc(a.name)} vs ${esc(b.name)}</a>.`}
-  if(/who (made|built|developed)|smit|developer/.test(t))return'This fan site was developed by Smit Salunkhe. It is not affiliated with BMW AG.';
-  const m=findModel(t)||(/\b(it|its|that|this)\b/.test(t)?last:null);
-  if(m){last=m;const hits=FIELDS.filter(f=>f[1].test(t));
-   if(hits.length){return`<b>${esc(m.name)}</b><br>`+hits.slice(0,3).map(f=>{const v=val(m,f[0]);return`${f[2]}: ${v==='TBD'||!v?'not verified yet (to be added)':esc(v)}`}).join('<br>')+`<br>${link(m)}`}
-   return`<b>${esc(m.name)}</b> (${esc(m.gen)}, ${esc(m.years)}): ${esc(m.intro)}<br>Power: ${esc(m.pw==='TBD'?'to be added':m.pw)}.<br>${link(m)}`}
-  const yr=t.match(/\b(1[89]\d\d|20\d\d)\b/);if(yr){const e=TIMELINE.find(x=>x.y===yr[1]);if(e)return`<b>${e.y}: ${esc(e.t)}</b><br>${esc(e.x)}`}
-  if(/found|origin|begin|start of bmw|history of bmw/.test(t))return`<b>${TIMELINE[0].y}: ${esc(TIMELINE[0].t)}</b><br>${esc(TIMELINE[0].x)}<br><a href="history.html">Full timeline</a>`;
-  const cat=CATS.find(c=>t.includes(norm(c)))||(/classic|old|vintage/.test(t)?'Classic':/\bm (series|cars?)\b|m division/.test(t)?'M Series':null);
-  if(cat){const l=MODELS.filter(x=>x.cat===cat);return l.length?`${esc(cat)}: ${l.map(link).join(', ')}.`:`No ${esc(cat)} models in the catalogue yet.`}
-  if(/3d/.test(t))return'See the <a href="3d-experience.html">3D page</a>. Models appear there once a 3D file is added.';
-  if(/quiz|which bmw/.test(t))return'Try <a href="quiz.html">Which BMW are you?</a>';
-  return'I could not match that. Try a model name ("M4", "E30 M3", "Z8"), a series ("5 Series") or a topic like "classic BMWs".'}
- async function ask(q){say(esc(q),true);const w=say('...');
-  if(CFG.CHAT_ENDPOINT){try{const m=findModel(norm(q))||last,r=await fetch(CFG.CHAT_ENDPOINT,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({message:q,context:m||{}})});const d=await r.json();if(d.reply){if(m)last=m;w.textContent=d.reply;return}}catch(e){}}
-  w.innerHTML=local(q);msgs.scrollTop=msgs.scrollHeight}
+ const msgs=$('#msgs',chat),sug=$('#sug',chat);
+ const say=(h,me,cf)=>{const d=document.createElement('div');d.className='msg'+(me?' me':'');d.innerHTML=h+(cf?`<span class="cf">${cf}</span>`:'');msgs.append(d);msgs.scrollTop=msgs.scrollHeight;return d};
+ const fmt=t=>BMWChat.linkify(esc(t).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/^\s*[-*]\s+/gm,'&bull; ').replace(/\n/g,'<br>'));
+ const STARTERS=(BMW_KB.starters||[]);const showSug=()=>{sug.innerHTML=STARTERS.slice(0,4).map(s=>`<button type="button">${esc(s)}</button>`).join('')};
+ const hello=()=>say(AI?'Hi! I am the BMWorld guide. Ask me anything about BMW: the 79 models in the catalogue, engines, technology, motorsport, electric cars, comparisons or which model suits you.':'Hi! I am the BMWorld guide (offline mode). I answer from the 79-model catalogue and a BMW knowledge base, and I tell you when a figure is not on file. Try a model, a comparison or "recommend a family BMW".');
+ const open=()=>{chat.hidden=false;if(!msgs.children.length){hello();showSug()}$('#cin').focus()};
+ $('#dkChat').onclick=()=>chat.hidden?open():chat.hidden=true;$('#cx',chat).onclick=()=>chat.hidden=true;
+ $('#cnew',chat).onclick=()=>{st=BMWChat.newState();hist=[];msgs.innerHTML='';hello();showSug()};
+ addEventListener('keydown',e=>{if(e.key==='Escape'&&!chat.hidden)chat.hidden=true});
+ sug.onclick=e=>{const b=e.target.closest('button');if(b)ask(b.textContent)};
+ $('#cform').onsubmit=e=>{e.preventDefault();const v=$('#cin').value.trim();if(v&&!busy){$('#cin').value='';ask(v)}};
+ async function ask(q){busy=true;sug.innerHTML='';say(esc(q),true);const w=say('<span class="dots"><i></i><i></i><i></i></span>');
+  const ctx=AI?BMWChat.context(q,st):null,local=BMWChat.answer(q,st,{ai:AI});   /* the local pass also keeps the follow-up memory (model, pair, field) up to date */
+  let done=false;
+  if(AI){try{const ac=new AbortController(),to=setTimeout(()=>ac.abort(),30000);
+    const r=await fetch(CFG.CHAT_ENDPOINT,{method:'POST',headers:{'content-type':'application/json'},signal:ac.signal,body:JSON.stringify({message:q,history:hist.slice(-8),context:ctx})});clearTimeout(to);
+    const d=await r.json();if(r.ok&&d.reply){w.innerHTML=fmt(d.reply)+'<span class="cf">AI answer. Check exact figures on the model pages.</span>';hist.push({role:'user',content:q},{role:'assistant',content:d.reply});done=true}}catch(e){}}
+  if(!done){w.innerHTML=local.html+(local.cf?`<span class="cf">${esc(local.cf)}</span>`:'')+(AI?'<span class="cf">The AI service did not respond, so this answer came from the offline guide.</span>':'');hist.push({role:'user',content:q},{role:'assistant',content:local.plain||local.html.replace(/<[^>]+>/g,' ')})}
+  msgs.scrollTop=msgs.scrollHeight;busy=false;$('#cin').focus()}
 });
 /* compare page */
-function comparePage(){const q=new URLSearchParams(location.search),A=$('#cmpA'),B=$('#cmpB'),opts=MODELS.map(m=>`<option value="${m.slug}">${esc(m.name)}</option>`).join('');A.innerHTML=opts;B.innerHTML=opts;
- A.value=bySlug(q.get('a'))?q.get('a'):'m4-competition';B.value=bySlug(q.get('b'))?q.get('b'):(A.value==='e30-m3'?'m4-competition':'e30-m3');
- const rows=[['Generation','gen'],['Production','years'],['Engine','e'],['Engine code','ec'],['Displacement','dp'],['Power','pw'],['Torque','tq'],['Top speed','ts'],['Acceleration','ac'],['Transmission','tr'],['Drive','dr']];
+function comparePage(){const q=new URLSearchParams(location.search),A=$('#cmpA'),B=$('#cmpB'),opts=ERAS.map(e=>`<optgroup label="${e.range} | ${esc(e.name)}">${MODELS.filter(m=>m.era===e.id).map(m=>`<option value="${m.slug}">${m.n}. ${esc(m.name)}</option>`).join('')}</optgroup>`).join('');A.innerHTML=opts;B.innerHTML=opts;
+ A.value=bySlug(q.get('a'))?q.get('a'):'m4';B.value=bySlug(q.get('b'))?q.get('b'):(A.value==='m3'?'m4':'m3');
+ const rows=[['Catalogue','n'],['Generation','gen'],['Body','body'],['Production','years'],['Engine','e'],['Engine code','ec'],['Displacement','dp'],['Power','pw'],['Torque','tq'],['Top speed','ts'],['Acceleration','ac'],['Transmission','tr'],['Drive','dr']];
  const draw=()=>{const a=bySlug(A.value),b=bySlug(B.value);history.replaceState(null,'',`compare.html?a=${a.slug}&b=${b.slug}`);
-  $('#cmpOut').innerHTML=`<div class="cmp-h"><div></div>${[a,b].map(m=>`<div><div class="im">${cover(m)}</div><h4><a href="model.html?model=${m.slug}">${esc(m.name)}</a></h4></div>`).join('')}</div><table class="cmp">${rows.map(r=>`<tr><th>${r[0]}</th><td>${spec(a[r[1]])}</td><td>${spec(b[r[1]])}</td></tr>`).join('')}</table>`};
+  $('#cmpOut').innerHTML=`<div class="cmp-h"><div></div>${[a,b].map(m=>`<div><div class="im">${cover(m)}</div><h4><a href="model.html?model=${m.slug}">${esc(m.name)}</a></h4></div>`).join('')}</div><table class="cmp">${rows.map(r=>`<tr><th>${r[0]}</th><td>${spec(a[r[1]])}</td><td>${spec(b[r[1]])}</td></tr>`).join('')}</table>${[a,b].some(m=>m.rep)?`<p class="note mt-2">${[a,b].filter(m=>m.rep).map(m=>esc(m.name)+': '+esc(m.rep)).join(' | ')}.</p>`:''}`};
  A.onchange=draw;B.onchange=draw;draw()}
 /* quiz page */
 const QUIZ=[
-{q:"Pick your ideal road.",a:[["A winding mountain pass",{"m2":2,"m4-competition":2,"1m-coupe":1,"e30-m3":1}],["The autobahn at night",{"m5-cs":2,"m8-competition":2,"760i-xdrive":1}],["An empty coast road, roof down",{"z8":2,"i8-roadster":1,"3-0-csl":1}]]},
-{q:"Which era is yours?",a:[["The 70s and 80s",{"3-0-csl":2,"2002-turbo":2,"m1":2,"e30-m3":2,"m635csi":2}],["The 2000s",{"z8":2,"1m-coupe":2}],["Today and tomorrow",{"m4-competition":2,"i8-roadster":1,"xm":2,"m2":2,"760i-xdrive":1}]]},
-{q:"What matters most?",a:[["Raw speed",{"m5-cs":2,"m4-competition":2,"m8-competition":1}],["Style and rarity",{"m1":2,"z8":2,"3-0-csl":2}],["Comfort and presence",{"760i-xdrive":2,"xm":2,"m8-competition":1}],["Clever technology",{"i8-roadster":2,"xm":1,"2002-turbo":1}]]},
-{q:"Your weekend plan?",a:[["A track day",{"m4-competition":2,"m2":2,"e30-m3":2,"1m-coupe":1}],["A long road trip",{"m8-competition":2,"760i-xdrive":2,"m635csi":2}],["A classic car show",{"m1":2,"3-0-csl":2,"z8":1,"2002-turbo":2}]]},
-{q:"Which engine note?",a:[["A smooth straight-six",{"m4-competition":2,"1m-coupe":2,"m1":1,"m635csi":2,"3-0-csl":2,"m2":2}],["V8 thunder",{"m5-cs":2,"m8-competition":2,"z8":2,"760i-xdrive":1,"xm":1}],["Turbo whoosh or electric hum",{"2002-turbo":2,"i8-roadster":2,"xm":1}]]}];
+{q:"Pick your ideal road.",a:[["A winding mountain pass",{"m2":2,"m4":2,"1m-coupe":1,"m3":1}],["The autobahn at night",{"m5":2,"m8":2,"7-series":1}],["An empty coast road, roof down",{"z8":2,"i8":1,"3-0-cs":1}]]},
+{q:"Which era is yours?",a:[["The 70s and 80s",{"3-0-cs":2,"2002":2,"m1":2,"m3":2,"m635csi":2}],["The 2000s",{"z8":2,"1m-coupe":2}],["Today and tomorrow",{"m4":2,"i8":1,"xm":2,"m2":2,"7-series":1}]]},
+{q:"What matters most?",a:[["Raw speed",{"m5":2,"m4":2,"m8":1}],["Style and rarity",{"m1":2,"z8":2,"3-0-cs":2}],["Comfort and presence",{"7-series":2,"xm":2,"m8":1}],["Clever technology",{"i8":2,"xm":1,"2002":1}]]},
+{q:"Your weekend plan?",a:[["A track day",{"m4":2,"m2":2,"m3":2,"1m-coupe":1}],["A long road trip",{"m8":2,"7-series":2,"m635csi":2}],["A classic car show",{"m1":2,"3-0-cs":2,"z8":1,"2002":2}]]},
+{q:"Which engine note?",a:[["A smooth straight-six",{"m4":2,"1m-coupe":2,"m1":1,"m635csi":2,"3-0-cs":2,"m2":2}],["V8 thunder",{"m5":2,"m8":2,"z8":2,"7-series":1,"xm":1}],["Turbo whoosh or electric hum",{"2002":2,"i8":2,"xm":1}]]}];
 function quizPage(){const R=$('#quizRoot');let n=0,sc={};
  const show=()=>{if(n>=QUIZ.length){const top=Object.entries(sc).sort((a,b)=>b[1]-a[1])[0],m=bySlug(top&&top[0])||MODELS[0];
    R.innerHTML=`<div class="q"><small class="tag">Your match</small><h2>${esc(m.name)}</h2><div class="frame mb-3">${cover(m)}</div><p class="lead">${esc(m.intro)}</p><a class="btn btn-m" href="model.html?model=${m.slug}">See the details</a> <button class="btn btn-glass" id="again">Retake the quiz</button></div>`;$('#again').onclick=()=>{n=0;sc={};show()};return}
