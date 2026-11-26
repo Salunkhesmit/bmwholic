@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded',()=>{
  /* drive modes */
  const MODES=['comfort','sport','track'],modeNow=()=>MODES.includes(root.dataset.mode)?root.dataset.mode:'sport';
  const dock=document.createElement('div');dock.className='dock';
- dock.innerHTML=`<div class="modes" role="group" aria-label="Drive mode">${MODES.map(m=>`<button data-mode="${m}" aria-pressed="false">${m}</button>`).join('')}</div><button id="dkMas" aria-pressed="true">Mascot</button><button class="ask" id="dkChat" aria-label="Ask BMWorld">Ask<span class="ask-x"> BMWorld</span></button>;
+  dock.innerHTML=`<div class="modes" role="group" aria-label="Drive mode">${MODES.map(m=>`<button data-mode="${m}" aria-pressed="false">${m}</button>`).join('')}</div><button id="dkMas" aria-pressed="true">Mascot</button><button class="ask" id="dkChat" aria-label="Ask BMWorld">Ask<span class="ask-x"> BMWorld</span></button>`;
  const wipe=document.createElement('div');wipe.className='mwipe';wipe.setAttribute('aria-hidden','true');
  document.body.append(dock,wipe);
  wipe.addEventListener('animationend',()=>wipe.classList.remove('go'));
