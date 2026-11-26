@@ -150,8 +150,8 @@
   endAt=0;t0=0;canvas.classList.add('on');wr(LAST,name);raf=requestAnimationFrame(loop)}
  const rnd=(a,b)=>a+Math.random()*(b-a),blocked=()=>document.body.classList.contains('has-intro')&&!document.body.classList.contains('ended')||document.querySelector('.modal.show')||(document.querySelector('.chat')&&!document.querySelector('.chat').hidden);
  function pick(){const last=rd(LAST),pool=ORDER.filter(n=>n!==last&&!(small&&n==='engine'&&false));return pool[Math.floor(Math.random()*pool.length)]}
- let nextAt=Math.max(+rd(NEXT)||0,Date.now()+rnd(15000,25000));
- function tick(){if(!enabled||dead||running||document.hidden||count>=5||blocked())return;if(Date.now()<nextAt||acc<400)return;acc=0;count++;nextAt=Date.now()+rnd(40000,75000);wr(NEXT,String(nextAt));play(pick())}
+ let nextAt=Math.max(+rd(NEXT)||0,Date.now()+rnd(15000,20000));
+ function tick(){if(!enabled||dead||running||document.hidden||count>=5||blocked())return;if(Date.now()<nextAt||acc<400)return;acc=0;count++;nextAt=Date.now()+rnd(20000,30000);wr(NEXT,String(nextAt));play(pick())}
  document.addEventListener('DOMContentLoaded',()=>{
   ly=scrollY;addEventListener('scroll',()=>{acc+=Math.abs(scrollY-ly);ly=scrollY;tick()},{passive:true});setInterval(tick,3000);
   const dock=document.querySelector('.dock');if(dock){const b=document.createElement('button');b.id='dkFx';b.type='button';b.textContent='3D FX';b.setAttribute('aria-pressed',String(enabled));b.title='Occasional 3D animations: on/off';
