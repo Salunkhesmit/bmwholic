@@ -155,8 +155,11 @@ body{overflow-x:clip}img,video,canvas{max-width:100%}
  .tl button.on{border:0;color:#fff}.tl button.on::before{background:var(--red);box-shadow:0 0 0 4px rgba(229,26,36,.25)}
  .tl .tl-panel{padding:.25rem .25rem 1rem 1rem}
  /* dock + chat as compact mobile controls */
- .dock{left:.5rem;right:.5rem;bottom:calc(.5rem + env(safe-area-inset-bottom));max-width:none;justify-content:center;gap:.3rem}
- .dock button{font-size:.66rem;padding:.4rem .55rem}
+ .dock{left:.5rem;right:.5rem;bottom:calc(.5rem + env(safe-area-inset-bottom));max-width:none;justify-content:center;gap:.25rem;flex-wrap:nowrap}
+ .dock .modes{gap:.25rem;flex:none}
+ .dock button{font-size:.6rem;padding:.4rem .35rem;letter-spacing:.02em;white-space:nowrap}
+ .dock .ask-x{display:none}
+ .mascot{bottom:calc(3.6rem + env(safe-area-inset-bottom))}
  .chat{left:.5rem;right:.5rem;width:auto;bottom:calc(.5rem + env(safe-area-inset-bottom));height:min(75vh,560px);height:min(75dvh,560px)}
  .mascot{bottom:3.4rem}
  .modal-dialog{margin:.5rem auto;max-width:calc(100vw - 1rem)}
@@ -177,7 +180,7 @@ body{overflow-x:clip}img,video,canvas{max-width:100%}
 /* small mobile 320-374 */
 @media(max-width:374.98px){
  .navbar-brand{font-size:1.05rem}.snd-btn{padding:.35rem .5rem;gap:.3rem;margin-right:.4rem}
- .dock button{font-size:.6rem;padding:.4rem .4rem}
+ .dock button{font-size:.54rem;padding:.4rem .3rem}
  .lead{font-size:.98rem}.btn-m,.btn-glass{padding:.65rem 1rem}
 }
 /* landscape phones: short viewport */
